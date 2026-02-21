@@ -1,9 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Initialize Supabase only if valid URL is provided
+let supabase: any = {
+  from: () => ({ select: () => Promise.resolve({ data: [], error: null }) }),
+  auth: {
+    signInWithOAuth: async () => ({ data: null, error: new Error('Supabase not configured') }),
+    signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
+    signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
+    signOut: async () => ({ error: null }),
+    getUser: async () => ({ data: { user: null } }),
+  }
+};
+
+if (supabaseUrl && supabaseUrl !== 'https://placeholder.supabase.co') {
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  } catch (error) {
+    console.warn('Supabase initialization failed');
+  }
+}
+
+export { supabase };
 
 // Watchlist functions
 export const watchlistApi = {
